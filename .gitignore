@@ -1,0 +1,6 @@
+test/
+tmp*
+*.yaml
+*.hmtl
+.cookies
+.email 
