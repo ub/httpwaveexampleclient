@@ -1,6 +1,7 @@
 test/
 tmp*
 *.yaml
-*.hmtl
+*.html
 .cookies
-.email 
+.email
+*.*~
