@@ -10,7 +10,9 @@ require 'yaml'
 require 'json'
 require 'pp'
 
+
 require 'file_names.rb'
+require 'file_queue.rb'
 
 #Monkey patch for Ruby 1.8
 class IO 
@@ -112,7 +114,8 @@ class ForwardChannel < BrowserChannel
   # experimental version - ofset not keeped
   def send_strings_hack(ofs, *strings)
     count = strings.size
-    
+    puts "# OF REQUESTS= #{count}  ----------------------------------"
+    puts "-" * 80
     body_params=[[:count, count],
                  [:ofs, ofs    ]
                 ]
@@ -219,11 +222,49 @@ def outgoing_msg2012(r)
   %{{"a":"#{$wsessionid}","r":"#{r}","t":2012,"p":{"1000":[0,0]}}}
 end  
 
+
+
+class Wfe
+  
+  def initialize(wfe_sessionid, predefined_query_id)
+    @sessionid=wfe_sessionid
+    @pqid=predefined_query_id
+    @query_number=-1
+    @r=0
+  end
+  
+  def substitute_values(message_template)
+         eval( '%Q{' + message_template +'}', binding)
+  end
+     
+  protected
+  
+  attr_reader :sessionid 
+  #Current query id
+  def qid
+    return @pqid if @query_number < 0
+    @sessionid + @query_number.to_s
+  end  
+  
+  #Next (new) query id
+  def nqid
+    @query_number +=1
+    qid
+  end
+  
+   #Answer next request message id
+  def r
+    result=@r.to_s(16)
+    @r+=1
+    result
+  end
+  
+end
+
+
 =begin
   THE EXECUTION STARTS HERE 
 =end
-
-
 
 read_global_vars()
 
@@ -232,18 +273,30 @@ WARN_MEM_LEAK =  ARGV.include? "-w"
 sticky    = $__session[:sessionData][:sticky_session]
 $wsessionid = $__session[:sessionData][:sessionid]
 
+wfe_requests_input = SimpleFileQueue::Reader.new(QUEUE_FN)
+query_id=$__fsd.requests.find {|r| r["r"] == "^d1"}["p"]["2"]
+
+w=Wfe.new($wsessionid, query_id)
+
 shared_aid_obj=BrowserChannel::AID.new
 forward=ForwardChannel.new(shared_aid_obj, sticky, DEBUG_DEV)
 forward.initChannel()
 sid=forward.getSID
 back=BackChannel.new(shared_aid_obj, sticky, sid, DEBUG_DEV)
 
- forward.send_strings_hack(0,outgoing_msg2000(0))
+# forward.send_strings_hack(0,outgoing_msg2000(0))
 
 
 
 loop do
 back.request
+# {"a":"#{sessionid}","t":2007,"r":"#{r}","p":{"1000":[0,0],"2":"#{qid}"}}
+req_templates = wfe_requests_input.readall
+forward_requests = req_templates.collect{|templ| w.substitute_values(templ)}
+pp forward_requests
+ puts " # OF REQUESTS: =========================== #{forward_requests.size}"
+forward.send_strings_hack(0, *forward_requests) unless forward_requests.empty?
+    
 loop do 
   m= back.response
   break if m.nil?

@@ -35,7 +35,7 @@ module SimpleFileQueue
       close
     end
     
-    private
+    #private
     def open
       @fr=File.new(@rfn,'r')
     rescue
@@ -58,10 +58,14 @@ module SimpleFileQueue
   end
   
   class Writer
-    def initialize(filename)
+    def initialize(filename, new = true)
       @wfn=filename
-      reopen
-      close
+      if new then
+	 File.open(@wfn, "w"){}
+      else
+       reopen
+       close
+      end
     end
     def <<(string)
       reopen
@@ -76,8 +80,8 @@ module SimpleFileQueue
       close
     end
     private
-    def reopen
-      @fw=File.new(@wfn,"a")
+    def reopen     
+      @fw=File.new(@wfn, "a")
     rescue 
       nil
     end
