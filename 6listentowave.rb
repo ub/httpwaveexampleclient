@@ -1,4 +1,11 @@
 #!/usr/bin/env ruby
+#
+#
+#  this code is made available under the MIT License (see MIT-LICENSE.txt)
+#  Copyright (c) 2010 Yuri Baranov <baranovu+gh@gmail.com>
+#
+
+
 
 require 'rubygems'
 require 'httpclient'

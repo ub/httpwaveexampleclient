@@ -1,3 +1,10 @@
+#
+#
+#  this code is made available under the MIT License (see MIT-LICENSE.txt)
+#  Copyright (c) 2010 Yuri Baranov <baranovu+gh@gmail.com>
+#
+
+
 # A quik and dirty IPC via the file
 # each message is a single line terminated with \n
 #  
