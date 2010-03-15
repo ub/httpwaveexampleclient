@@ -2,7 +2,6 @@ test/
 tmp*
 *.yaml
 *.html
-.cookies
-.email
+.*
 *.*~
 wfereqs

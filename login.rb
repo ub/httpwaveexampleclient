@@ -1,16 +1,17 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'highline/import'
+gem 'httpclient', '>= 2.1.5.2'
 require 'httpclient'
 require 'cgi'
 require 'pp'
 
 require 'file_names.rb'
 
-LOGIN_FN='.email'
+LOGIN_FN = '.login'
 APPLICATION_NAME="Http-Wave-Example-Client_0.1_by_ub"
 
-def get_login(prompt="Enter google login (E-mail): ")
+def get_login(prompt="Enter google login: ")
  
   default=nil
   if File.exist? LOGIN_FN then 
@@ -50,7 +51,6 @@ class HTTPClient
                               [nil, resp.status, resp.reason]   
   end
 end
-
 login    = get_login()
 password = get_password()
 
