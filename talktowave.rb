@@ -105,25 +105,25 @@ class ForwardChannel < BrowserChannel
       [:t, 1] 
     ]
     body_params=[[:count,0]]  
-    resp=@client.request(:post,CHANNEL_BASE_URI,url_params,body_params)
+    resp=@client.request(:post,CHANNEL_BASE_URI,
+                                url_params,body_params)
     if resp.status==200
       @sid=resp.body.content[/"c","([^"]+)"/,1]
     end
     puts resp.body.content
   end
   
-  # maps is the name for outgoing requests in google's browser
-  # channel comments
+  # maps is the name for outgoing requests in google's
+  # browser channel comments
   def send_maps( *strings)
     count = strings.size
-    puts "# OF REQUESTS= #{count}  ----------------------------------"
-    puts "-" * 80
     body_params=[[:count, count],
                  [:ofs, @ofs    ]
                 ]
     @ofs += count
     i=-1    
-    body_params.concat( strings.map {|s| i+=1; ["req#{i}_key",s]})
+    body_params.concat( strings.map {|s| i+=1;
+                                         ["req#{i}_key",s]})
     url_params=[
       [:gsessionid, @gsessionid],
       [:VER, 8],
@@ -133,15 +133,17 @@ class ForwardChannel < BrowserChannel
       [:zx, randomstring()],
       [:t, 1] 
     ]
-    pp body_params
-    resp=@client.request(:post,CHANNEL_BASE_URI,url_params,body_params)
+
+    resp=@client.request(:post,CHANNEL_BASE_URI,
+                               url_params,body_params)
     print resp.status ,' ', resp.reason, "\n" 
   end
 end
 
 class BackChannel < BrowserChannel
-  def initialize(aid_holder, sticky_session, channelSID,debug_dev)
-    @sid=channelSID   
+  def initialize(aid_holder, sticky_session, channel_SID,
+                 debug_dev)
+    @sid=channel_SID
     super(aid_holder, sticky_session,debug_dev)
   end
   def setAID(aid)
@@ -160,10 +162,12 @@ class BackChannel < BrowserChannel
       [:TYPE, 'xmlhttp'],
       [:zx, randomstring()],
       [:t, 1] 
-    ]
-       connection=@client.request_async(:get, CHANNEL_BASE_URI, url_params,nil,
-                             'Connection'=>'keep-alive',
-                             'Keep-Alive'=>'300' )  
+      ]
+       connection=
+          @client.request_async(:get, CHANNEL_BASE_URI,
+                                url_params,nil,
+                                'Connection'=>'keep-alive',
+                                'Keep-Alive'=>'300' )
        message=connection.pop
        puts connection.class.ancestors
        @stream=message.content
@@ -173,7 +177,8 @@ class BackChannel < BrowserChannel
   end
   def response
     if @stream.eof? then
-       @stream.close # IO objects are leaked nonetheless! Possible bug in httpclient 2.1.5.2
+       @stream.close # IO objects are leaked nonetheless!
+                     # Possible bug in httpclient 2.1.5.2(?)
        return nil 
     end
     n=@stream.readline.to_i
@@ -207,6 +212,26 @@ end
 
 
 class Wfe
+  def initialize(jsvars_filename, queue_filename, debug_dev=nil)
+
+    # @__fsd, @__session, @__client_flags
+    read_wave_vars(jsvars_filename)
+    @requests_input = SimpleFileQueue::Reader.new(QUEUE_FN)
+
+
+  end
+  # start the browser channel protocol
+  def start
+
+  end
+
+  private
+  def read_wave_vars(filename)
+    jsvars=YAML.load_file JSVARS_FN
+    @__fsd       = OpenStruct.new(jsvars.__fsd.value)
+    @__session   = jsvars.__session
+    @__client_flags = jsvars.__client_flags
+  end
   class RequestTemplate
   end
 end
