@@ -169,7 +169,6 @@ class BackChannel < BrowserChannel
                                 'Connection'=>'keep-alive',
                                 'Keep-Alive'=>'300' )
        message=connection.pop
-       puts connection.class.ancestors
        @stream=message.content
        #pp message.header
        print message.status," ",message.reason
@@ -186,7 +185,7 @@ class BackChannel < BrowserChannel
     m.each_line do |l|
       n=l[/^(\[|,)\[(\d+)/,2]
       self.setAID(n.to_i) if n
-      print "Next Array ID:",n,"\n"
+      print( "Next Array ID:",n,"\n") if n
     end
     m
   end
@@ -239,6 +238,16 @@ class Wfe
   
   # and run the main loop
   def run
+    loop do
+      @back_channel.request
+      loop do
+	send_queued_requests_if_any()
+	m= @back_channel.response
+        break if m.nil?
+        puts "#{Time.now.strftime("%H:%M:%S")} #{m}"
+      end
+      detect_and_report_memleak if WARN_MEM_LEAK
+    end
   end
 
   protected
@@ -261,7 +270,13 @@ class Wfe
     @__client_flags = jsvars.__client_flags
   end
 
-
+  def send_queued_requests_if_any
+        templates = @requests_input.readall
+	return nil if templates.empty?
+	requests=templates.collect{|templ| message_from_template(templ)}
+	@forward_channel.send_maps(*requests) 
+  end
+  
   module RequestTemplateInterface
    
    def message_from_template(  message_template)
@@ -269,7 +284,7 @@ class Wfe
    end
    protected
     attr_reader :__fsd, :__session, :__client_flags
-    attr_reader :pqid # predefined query ID
+    attr_reader :sessionid
 
     # next request message id
     def r
@@ -295,3 +310,12 @@ class Wfe
   end
   include RequestTemplateInterface
 end
+
+=begin
+  main program starts here
+=end
+DEBUG_DEV =  ( ARGV.include? "-d") ? STDERR : nil
+WARN_MEM_LEAK =  ARGV.include? "-w"
+wfe=Wfe.new(JSVARS_FN, QUEUE_FN, DEBUG_DEV)
+wfe.startup
+wfe.run
