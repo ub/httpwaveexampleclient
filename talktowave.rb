@@ -214,17 +214,45 @@ end
 class Wfe
   def initialize(jsvars_filename, queue_filename, debug_dev=nil)
 
+    @debug_dev=debug_dev 
     # @__fsd, @__session, @__client_flags
     read_wave_vars(jsvars_filename)
     @requests_input = SimpleFileQueue::Reader.new(QUEUE_FN)
 
+    @sessionid=get_sessionid()
+    @sticky=get_sticky_sessionid()
+
+    
+    RequestTemplateInterface.const_set(:PQID, predefined_query_id())
+    @query_number=-1
+    @r=0
 
   end
   # start the browser channel protocol
-  def start
-
+  def startup
+    shared_aid_obj=BrowserChannel::AID.new
+    @forward_channel=ForwardChannel.new(shared_aid_obj, @sticky, @debug_dev)
+    @forward_channel.initChannel()
+    sid=@forward_channel.getSID
+    @back_channel=BackChannel.new(shared_aid_obj, @sticky, sid, @debug_dev)
+  end
+  
+  # and run the main loop
+  def run
   end
 
+  protected
+   def get_sessionid
+     @__session[:sessionData][:sessionid]
+   end
+   def get_sticky_sessionid
+     @__session[:sessionData][:sticky_session]
+   end
+     
+
+   def predefined_query_id
+     @__fsd.requests.find {|r| r["r"] == "^d1"}["p"]["2"]
+   end
   private
   def read_wave_vars(filename)
     jsvars=YAML.load_file JSVARS_FN
@@ -232,6 +260,38 @@ class Wfe
     @__session   = jsvars.__session
     @__client_flags = jsvars.__client_flags
   end
-  class RequestTemplate
+
+
+  module RequestTemplateInterface
+   
+   def message_from_template(  message_template)
+     eval( '%Q{' + message_template +'}', binding)
+   end
+   protected
+    attr_reader :__fsd, :__session, :__client_flags
+    attr_reader :pqid # predefined query ID
+
+    # next request message id
+    def r
+      rs=@r.to_s(16); @r+=1; rs
+    end
+
+    #Current query id
+     def qid
+	@sessionid + @query_number.to_s
+     end  
+	
+     #Next (new) query id
+     def nqid
+	@query_number +=1
+	qid
+     end    
+     
+     # a random string with given length just in case we need one ...     
+     def rndstr(l=8)
+       set=('a'..'z').to_a + ('A'..'Z').to_a + ('0'..'9').to_a
+       (0...l).map{ set[rand(set.length)] }.join
+     end 
   end
+  include RequestTemplateInterface
 end
