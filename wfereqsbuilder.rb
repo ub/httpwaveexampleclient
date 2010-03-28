@@ -40,7 +40,6 @@ ok=choose do |menu|
   end
 =end
 
-#TODO: remove this comment line. It is for git Rubymine testing only!
 def deepcopy(o)
   Marshal.load(Marshal.dump(o))
 end
