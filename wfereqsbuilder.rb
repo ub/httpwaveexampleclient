@@ -40,6 +40,12 @@ ok=choose do |menu|
   end
 =end
 
+def deepcopy(o)
+  Marshal.load(Marshal.dump(o))
+end
+
+Marshal.
+
 class Hash
   def interactive_edit(parent,key_in_parent,prompt="> ")
     done=false
