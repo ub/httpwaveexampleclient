@@ -48,6 +48,7 @@ Marshal.
 
 class Hash
   def interactive_edit(parent,key_in_parent,prompt="> ")
+    #TODO: possibly refactor with the use of infinite while true/until false modifier 
     done=false
     choose do |menu|
       menu.index  = :none
@@ -107,14 +108,21 @@ class NilClass
 
 module StringAndHashInteractiveEditHelper
   def interactive_edit_member_helper(array, parent_of_array, key, prompt)
+    done=false
     choose do |menu|
       menu.index  = :none
-      menu.prompt = "Choose the command ':.' command #{prompt} "
+      menu.prompt = "Choose a command (:a/:d/:e)  #{prompt} "
+
       #TODO: we are here!
-      # append (duplicate) element (ask which if more than one or they are non-indentical)
-      # delete the last element
-      # edit element (ask which)
-    end
+      menu.choice(":a - append new element") {}# append (duplicate) element (ask which if more than one  non-indentical)
+      menu.choice(":d - delete last element"){}
+      menu.choice(":e - edit element (choose an index)"){} # edit element (ask which if more than one)
+      menu.choice(":x - accept changes"){}
+      menu.choice(":q - cancel changes"){}
+
+
+
+    end until done
 
   end
 end
