@@ -44,7 +44,7 @@ def deepcopy(o)
   Marshal.load(Marshal.dump(o))
 end
 
-Marshal.
+
 
 class Hash
   def interactive_edit(parent,key_in_parent,prompt="> ")
@@ -71,7 +71,7 @@ end
 
 class Integer
     def interactive_edit(parent,key_in_parent,prompt="> ")
-      ask(key_in_parent.to_s + prompt,Integer) {|question| question.default=self.clone rescue self}
+      ask(key_in_parent.to_s + prompt,Integer) {|question| question.default=self}
     end
 end
 
@@ -108,24 +108,46 @@ class NilClass
 
 module StringAndHashInteractiveEditHelper
   def interactive_edit_member_helper(array, parent_of_array, key, prompt)
+    working_copy=deepcopy(array)
     done=false
     choose do |menu|
       menu.index  = :none
       menu.prompt = "Choose a command (:a/:d/:e)  #{prompt} "
 
-      #TODO: we are here!
-      menu.choice(":a - append new element") {}# append (duplicate) element (ask which if more than one  non-indentical)
-      menu.choice(":d - delete last element"){}
-      menu.choice(":e - edit element (choose an index)"){} # edit element (ask which if more than one)
-      menu.choice(":x - accept changes"){}
-      menu.choice(":q - cancel changes"){}
+        #TODO: we are here!
+      menu.choice(":a - append new element") {# append (duplicate) element (ask which if more than one  non-indentical)
+        uniq=working_copy.uniq
+
+        index=case uniq.size
+        when 1 then 0
+        else
+          ask("Index of element to clone (0 - #{working_copy.size - 1}): ",Integer) {|question|
+            question.in=0..(working_copy.size - 1)}
+          end
+        working_copy << deepcopy(working_copy[index])
+        }  unless working_copy.empty?
+      menu.choice(":d - delete last element"){working_copy.delete_at(-1)} unless working_copy.empty?
+      menu.choice(":e - edit element (choose an index)"){ # edit element (ask which if more than one)
+        index= working_copy.size == 1 ? 0 :
+                ask("Index of element to edit (0 - #{working_copy.size - 1}): ",Integer) {|question|
+                  question.in=0..(working_copy.size - 1)}
+        result,force_nil=working_copy[index].interactive_edit(working_copy,index, ">> ")
+        working_copy[index]=result if result or force_nil
+        }unless working_copy.empty?
+      menu.choice(":x - accept changes"){return working_copy}
+      menu.choice(":q - cancel changes"){return nil,false}
 
 
+      end until done
 
-    end until done
-
+    end
   end
-end
+
+  class Integer
+      def interactive_edit_member_helper(array, parent_of_array, key, prompt)
+          interactive_edit(array,key,prompt) #TODO I'm not sure about this; now is 2AM |-O\       
+      end
+  end
 
 class String
   include StringAndHashInteractiveEditHelper
