@@ -11,7 +11,7 @@ require 'json'
 require 'js_subset_parser.rb'
 
 class MainWavePageInfoExtractor
-  SESS_REGEXP = /\bvar\s+\__session\s*=\s*(?=\{)/ 
+  SESS_REGEXP = /\bvar\s+__session\s*=\s*(?=\{)/
   REQ_REGEXP  = /__fsd.requests.push\(/
   RESP_REGEXP = /\bvar\s+json\s*=\s*\{"r":/     
 protected    
