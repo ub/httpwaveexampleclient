@@ -11,6 +11,7 @@
 
 require "rubygems"
 require "highline/import"
+require "json"
 require "pp"
 
 #NOTICE: THIS UTILITY IS UNDER CONSTRUCTION as of 29-03-2010
@@ -190,8 +191,15 @@ pp result
 def read_message_prototypes(filename)
   lines=File.open(filename,"r").lines
   request_prototypes=lines.map{|each| eval(eval('%q{' + each + '}'))}.compact
+  request_prototypes.each{|hash| puts hash.to_json}
+  request_prototypes.group_by{|each| each["t"]}
+end
+def read_message_prototypes_j(filename)
+  lines=File.open(filename,"r").lines
+  request_prototypes=lines.map{|each| JSON.parse each}.compact
   request_prototypes.group_by{|each| each["t"]}
 end
 
 
-#see samples/rt
+#see samples/rtj
+pp read_message_prototypes_j("samples/rtj")
