@@ -194,6 +194,11 @@ end
 $io_object_count=nil
 $memleak_report_count=0
 MAX_MEMLEAK_REPORTS=5
+
+def count_objects(klass)
+  ObjectSpace.each_object(klass).inject(0){|c,x| c+1}
+end
+
 def detect_and_report_memleak
  if $io_object_count.nil?
    $io_object_count=count_objects(IO)
