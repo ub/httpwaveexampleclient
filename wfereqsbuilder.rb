@@ -45,7 +45,7 @@ def deepcopy(o)
 end
 
 
-
+  #TODO: use deepcopy to preserve the original when user cancels...
 class Hash
   def interactive_edit(parent,key_in_parent,prompt="> ")
     #TODO: possibly refactor with the use of infinite while true/until false modifier 
@@ -62,6 +62,27 @@ class Hash
 
         }
       end
+      menu.choice(":n - add new key")       {new_key = ask( "Key? "){|question|
+        question.responses[:not_valid]="This key is already present or is not valid!"
+        question.validate=Proc.new{|answer| !(self.include?(answer) or
+                answer.empty? or
+                answer.first=?: )
+          }
+        }
+
+        #TODO: refactor -
+        value_array=[]
+        nil.interactive_edit_member_helper(value_array, {}, "_", "> ")
+
+        self[new_key]=value_array.first
+        }
+      menu.choice(":d - delete key")  {key_to_delete = ask("Which key? "){|question|
+        question.responses[:not_valid]="No such key!"
+        question.validate=Proc.new {|answer| self.include?(answer)}
+        }
+        self.delete key_to_delete
+      }
+
       menu.choice(":x - accept the result") {done=true}
       menu.choice(":q - cancel the edit")   {return nil, false}
     end until done
@@ -97,7 +118,7 @@ end
 class NilClass
   def interactive_edit_member_helper(array, parent_of_array, key, prompt)
      choose do |menu|
-       menu.prompt = "Add an element of which class? #{prompt} "
+       menu.prompt = "Which class? #{prompt} "
        menu.choice(Integer) {array << 0}
        menu.choices(String, Hash) {|klass| array << klass.new }
        menu.choice("do not add anything")
@@ -114,7 +135,7 @@ module StringAndHashInteractiveEditHelper
       menu.index  = :none
       menu.prompt = "Choose a command (:a/:d/:e)  #{prompt} "
 
-        #TODO: we are here!
+
       menu.choice(":a - append new element") {# append (duplicate) element (ask which if more than one  non-indentical)
         uniq=working_copy.uniq
 
@@ -157,6 +178,20 @@ class Hash
 end
 
 
+=begin
+
 result= pattern.interactive_edit(nil,2007)
 puts result
 pp result
+=end
+
+# return Hash where keys are message types, and values are arrays of prototypes
+# of the given type
+def read_message_prototypes(filename)
+  lines=File.open(filename,"r").lines
+  request_prototypes=lines.map{|each| eval(eval('%q{' + each + '}'))}.compact
+  request_prototypes.group_by{|each| each["t"]}
+end
+
+
+#see samples/rt
