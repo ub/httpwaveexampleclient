@@ -299,7 +299,12 @@ class Wfe
     #Current query id
      def qid
 	@sessionid + @query_number.to_s
-     end  
+     end
+
+   #user ID a.k.a 'username'
+   def un
+     @__session[:userProfile][:username]
+   end
 	
      #Next (new) query id
      def nqid
