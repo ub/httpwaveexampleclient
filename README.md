@@ -46,8 +46,8 @@ How to use
 
            $ ./login.rb
 
-Specify  username (without _@googlewave.com_ ) and password for google wave account. On success
-utility responds with
+   Specify  username (without _@googlewave.com_ ) and password for google wave account. On success
+   utility responds with
 
            302 Moved Temporarily
            ["https://wave.google.com/wave/?nouacheck"]
@@ -56,7 +56,7 @@ utility responds with
 
           $ ./getwave.rb
 
-Page is saved to _wavepage.html_ file.
+   Page is saved to _wavepage.html_ file.
 
 3. Parse the page with
 
