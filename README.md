@@ -54,13 +54,10 @@ How to use
    Page is saved to _wavepage.html_ file.
 
 3. Parse the page with
-
           $ ./parsewavepage.rb
 
 4. Start wfe requests templates edit utility
-
           $ ./wfereqsbuilder.rb
-
    Modify and write wfe request templates interactively to _wfereqs_ file. This is a rather primitive
    menu-based json objects editor. You may write another utility, if you like,
    or even use _echo [request text] >> wfereqs_ instead.
