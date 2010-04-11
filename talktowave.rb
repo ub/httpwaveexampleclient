@@ -185,7 +185,7 @@ class BackChannel < BrowserChannel
     m.each_line do |l|
       n=l[/^(\[|,)\[(\d+)/,2]
       self.setAID(n.to_i) if n
-      print( "Next Array ID:",n,"\n") if n
+     
     end
     m
   end
