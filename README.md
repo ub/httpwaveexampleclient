@@ -1,7 +1,7 @@
 Google Wave WFE protocol client implementation
 ==============================================
 
-Version 0.1 alpha 0
+Version 0.1 alpha 0.a
 
 The utility set implements current client part of Google Wave communication-over-http undocumented protocol (WFE).
 Useful for developers looking for implementation of Google Wave desktop utilities such as notifiers.
@@ -32,7 +32,8 @@ Requirements
 ------------
 
 - ruby 1.8.7 (will not run "as is" in 1.8.6 nor 1.9)
-- gems (of course)
+- libopenssl-ruby
+- ruby gems (of course!)
 - highline ruby library 1.5.2
 - httpclient 2.1.5.2 
 - json   1.2.4
